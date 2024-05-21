@@ -1,0 +1,107 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+class KMap {
+public:
+    KMap(int variables) : variables(variables) {
+        int size = pow(2, variables);
+        kmap.resize(size, -1); // Initialize with -1 (don't care)
+    }
+
+    void addMinterm(int minterm) {
+        if (minterm >= 0 && minterm < kmap.size()) {
+            kmap[minterm] = 1;
+        }
+    }
+
+    void addMaxterm(int maxterm) {
+        if (maxterm >= 0 && maxterm < kmap.size()) {
+            kmap[maxterm] = 0;
+        }
+    }
+
+    void printKMap() {
+        cout << "K-Map for " << variables << " variables:" << endl;
+        int cols = (variables == 3) ? 4 : (variables == 4) ? 4 : 8;
+        int rows = kmap.size() / cols;
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                int idx = binaryToGray(i) * (cols / 2) + binaryToGray(j);
+                cout << (kmap[idx] == -1 ? 'X' : kmap[idx] + '0') << " ";
+            }
+            cout << endl;
+        }
+    }
+
+    void minimizeExpression() {
+        // Simplified minimization logic
+        // For full minimization, implement Quine-McCluskey or similar algorithm
+        cout << "Simplified expression (not fully minimized): ";
+        for (int i = 0; i < kmap.size(); i++) {
+            if (kmap[i] == 1) {
+                printTerm(i);
+                if (i < kmap.size() - 1) cout << " + ";
+            }
+        }
+        cout << endl;
+    }
+
+private:
+    int variables;
+    vector<int> kmap;
+
+    int binaryToGray(int n) {
+        return n ^ (n >> 1);
+    }
+
+    void printTerm(int minterm) {
+        for (int i = variables - 1; i >= 0; i--) {
+            if (minterm & (1 << i)) cout << char('A' + variables - 1 - i);
+            else cout << char('A' + variables - 1 - i) << "'";
+        }
+    }
+};
+
+int main() {
+    int variables;
+    cout << "Enter number of variables (3, 4, or 5): ";
+    cin >> variables;
+
+    if (variables < 3 || variables > 5) {
+        cout << "Invalid number of variables. Exiting." << endl;
+        return 1;
+    }
+
+    KMap kmap(variables);
+
+    int numMinterms;
+    cout << "Enter number of minterms: ";
+    cin >> numMinterms;
+    cout << "Enter the minterms: ";
+    for (int i = 0; i < numMinterms; i++) {
+        int minterm;
+        cin >> minterm;
+        kmap.addMinterm(minterm);
+    }
+
+    int numMaxterms;
+    cout << "Enter number of maxterms: ";
+    cin >> numMaxterms;
+    cout << "Enter the maxterms: ";
+    for (int i = 0; i < numMaxterms; i++) {
+        int maxterm;
+        cin >> maxterm;
+        kmap.addMaxterm(maxterm);
+    }
+
+    kmap.printKMap();
+    kmap.minimizeExpression();
+
+    return 0;
+}
